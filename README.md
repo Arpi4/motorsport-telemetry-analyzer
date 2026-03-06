@@ -10,10 +10,12 @@ Features:
 - Lap comparison
 
 Technologies:
-- Java
-- Flask
+- Java (Spring Boot)
+- HTML
+- CSS
+- JavaScript
 - Chart.js
-- Java (desktop application later)
+- Java Desktop Application (later)
 
 Author:
 Árpád Zsolt Tóth
