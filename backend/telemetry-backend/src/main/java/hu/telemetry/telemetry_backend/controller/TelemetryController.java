@@ -1,7 +1,10 @@
 package hu.telemetry.telemetry_backend.controller;
 
+import hu.telemetry.telemetry_backend.model.TelemetryAnalysis;
 import hu.telemetry.telemetry_backend.model.TelemetryPoint;
+import hu.telemetry.telemetry_backend.service.TelemetryAnalyzerService;
 import hu.telemetry.telemetry_backend.service.TelemetryService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +17,12 @@ import java.util.List;
 public class TelemetryController {
 
     private final TelemetryService telemetryService;
+    private final TelemetryAnalyzerService analyzerService;
 
-    public TelemetryController(TelemetryService telemetryService) {
+    public TelemetryController(TelemetryService telemetryService,
+                               TelemetryAnalyzerService analyzerService) {
         this.telemetryService = telemetryService;
+        this.analyzerService = analyzerService;
     }
 
     @GetMapping("/test")
@@ -26,16 +32,26 @@ public class TelemetryController {
 
     @PostMapping("/upload")
     public ResponseEntity<List<TelemetryPoint>> uploadCsv(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+
+        List<TelemetryPoint> points = telemetryService.processCsv(file);
+
+        return ResponseEntity.ok(points);
+    }
+
+    @PostMapping("/analyze")
+    public ResponseEntity<TelemetryAnalysis> analyze(@RequestParam("file") MultipartFile file) {
 
         try {
+
             List<TelemetryPoint> points = telemetryService.processCsv(file);
-            return ResponseEntity.ok(points);
+
+            TelemetryAnalysis analysis = analyzerService.analyze(points);
+
+            return ResponseEntity.ok(analysis);
+
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TelemetryPoint {
+
     private double time;
     private double speed;
     private double throttle;
