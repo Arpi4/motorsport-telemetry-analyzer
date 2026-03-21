@@ -5,85 +5,109 @@ import {
     CategoryScale,
     LinearScale,
     PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
+    LineElement
 } from "chart.js";
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement);
 
 function App() {
+
     const [file, setFile] = useState(null);
-    const [analysis, setAnalysis] = useState(null);
-    const [speedData, setSpeedData] = useState(null);
+    const [lapAnalysis, setLapAnalysis] = useState(null);
+
+    const [lapChart, setLapChart] = useState(null);
+    const [sectorChart, setSectorChart] = useState(null);
+    const [speedChart, setSpeedChart] = useState(null);
 
     const uploadFile = async () => {
+
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost:8081/api/telemetry/analyze", {
+        const res = await fetch("http://localhost:8081/api/laps/analyze", {
             method: "POST",
             body: formData
         });
 
-        const data = await response.json();
-        setAnalysis(data);
+        const data = await res.json();
+        setLapAnalysis(data);
 
-        // Feltételezve, hogy a backend küld egy array-t speed vs time formában
-        setSpeedData({
-            labels: data.time,  // időpontok
+        // 🏁 Lap times
+        setLapChart({
+            labels: data.lapNumbers,
             datasets: [
                 {
-                    label: "Speed (km/h)",
-                    data: data.speed,
-                    borderColor: "rgba(75,192,192,1)",
-                    fill: false
+                    label: "Lap Times",
+                    data: data.lapTimes,
+                    borderColor: "purple"
+                }
+            ]
+        });
+
+        // 🟣 Sectors
+        setSectorChart({
+            labels: data.lapNumbers,
+            datasets: [
+                {
+                    label: "Sector 1",
+                    data: data.sector1,
+                    borderColor: "blue"
+                },
+                {
+                    label: "Sector 2",
+                    data: data.sector2,
+                    borderColor: "green"
+                },
+                {
+                    label: "Sector 3",
+                    data: data.sector3,
+                    borderColor: "orange"
+                }
+            ]
+        });
+
+        // 🚀 Speeds
+        setSpeedChart({
+            labels: data.lapNumbers,
+            datasets: [
+                {
+                    label: "I1 Speed",
+                    data: data.i1Speeds,
+                    borderColor: "cyan",
+                    tension: 0.3
+                },
+                {
+                    label: "I2 Speed",
+                    data: data.i2Speeds,
+                    borderColor: "yellow",
+                    tension: 0.3
                 }
             ]
         });
     };
 
     return (
-        <div style={{padding:40}}>
-            <h1>Telemetry Analyzer</h1>
+        <div style={{ padding: 40 }}>
+            <h1>Motorsport Lap Analyzer</h1>
 
-            <input
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])}
-            />
+            <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+            <br /><br />
+            <button onClick={uploadFile}>Upload CSV</button>
 
-            <br/><br/>
-
-            <button onClick={uploadFile}>
-                Upload CSV
-            </button>
-
-            {analysis && (
-                <div style={{marginTop:30}}>
-                    <h2>Analysis</h2>
-                    <p>Max Speed: {analysis.maxSpeed}</p>
-                    <p>Avg Speed: {analysis.avgSpeed}</p>
-                    <p>Avg Throttle: {analysis.avgThrottle}</p>
-                    <p>Avg Brake: {analysis.avgBrake}</p>
-                    <p>Gear Shifts: {analysis.gearShifts}</p>
+            {lapAnalysis && (
+                <div>
+                    <h2>Lap Analysis</h2>
+                    <p>Fastest Lap: {lapAnalysis.fastestLap}</p>
+                    <p>Average Lap: {lapAnalysis.averageLap}</p>
+                    <p>Best S1: {lapAnalysis.bestSector1}</p>
+                    <p>Best S2: {lapAnalysis.bestSector2}</p>
+                    <p>Best S3: {lapAnalysis.bestSector3}</p>
                 </div>
             )}
 
-            {speedData && (
-                <div style={{marginTop:30}}>
-                    <h2>Speed vs Time</h2>
-                    <Line data={speedData} />
-                </div>
-            )}
+            {lapChart && <Line data={lapChart} />}
+            {sectorChart && <Line data={sectorChart} />}
+            {speedChart && <Line data={speedChart} />}
         </div>
     );
 }
