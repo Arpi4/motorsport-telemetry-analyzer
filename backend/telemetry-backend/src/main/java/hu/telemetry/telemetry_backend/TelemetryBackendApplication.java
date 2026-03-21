@@ -9,5 +9,4 @@ public class TelemetryBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TelemetryBackendApplication.class, args);
 	}
-
 }

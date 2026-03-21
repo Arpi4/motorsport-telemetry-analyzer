@@ -10,18 +10,17 @@ import java.util.List;
 @Service
 public class TelemetryService {
 
-    private final CsvParser csvParser;
+    private final CsvParser parser;
 
-    public TelemetryService(CsvParser csvParser) {
-        this.csvParser = csvParser;
+    public TelemetryService(CsvParser parser) {
+        this.parser = parser;
     }
 
     public List<TelemetryPoint> processCsv(MultipartFile file) {
         try {
-            return csvParser.parse(file);
+            return parser.parse(file);
         } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
+            throw new RuntimeException("CSV parsing failed");
         }
     }
 }

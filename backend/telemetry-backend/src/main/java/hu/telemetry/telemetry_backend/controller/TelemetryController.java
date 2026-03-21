@@ -25,33 +25,12 @@ public class TelemetryController {
         this.analyzerService = analyzerService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "Telemetry backend working";
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<List<TelemetryPoint>> uploadCsv(@RequestParam("file") MultipartFile file) {
-
-        List<TelemetryPoint> points = telemetryService.processCsv(file);
-
-        return ResponseEntity.ok(points);
-    }
-
     @PostMapping("/analyze")
     public ResponseEntity<TelemetryAnalysis> analyze(@RequestParam("file") MultipartFile file) {
 
-        try {
+        List<TelemetryPoint> points = telemetryService.processCsv(file);
+        TelemetryAnalysis analysis = analyzerService.analyze(points);
 
-            List<TelemetryPoint> points = telemetryService.processCsv(file);
-
-            TelemetryAnalysis analysis = analyzerService.analyze(points);
-
-            return ResponseEntity.ok(analysis);
-
-        } catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(analysis);
     }
 }

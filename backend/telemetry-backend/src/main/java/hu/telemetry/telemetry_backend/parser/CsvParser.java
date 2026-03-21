@@ -29,7 +29,6 @@ public class CsvParser {
             }
 
             String line;
-
             Instant startTime = null;
 
             while ((line = br.readLine()) != null) {
@@ -39,8 +38,6 @@ public class CsvParser {
                 try {
 
                     double speed = getDouble(tokens, columnIndex, "speed");
-
-                    // 0-255 -> %
                     double throttle = getDouble(tokens, columnIndex, "throttle") / 255.0 * 100.0;
                     double brake = getDouble(tokens, columnIndex, "brake") / 255.0 * 100.0;
 
@@ -48,7 +45,6 @@ public class CsvParser {
                     int rpm = getInt(tokens, columnIndex, "rpm");
 
                     String dateStr = tokens[columnIndex.get("date")].replace(" ", "T");
-
                     Instant currentTime = Instant.parse(dateStr);
 
                     if (startTime == null) {
@@ -58,14 +54,7 @@ public class CsvParser {
                     double time = Duration.between(startTime, currentTime).toMillis() / 1000.0;
 
                     TelemetryPoint point = new TelemetryPoint(
-                            time,
-                            speed,
-                            throttle,
-                            brake,
-                            gear,
-                            rpm,
-                            0,
-                            0
+                            time, speed, throttle, brake, gear, rpm, 0, 0
                     );
 
                     points.add(point);
@@ -80,28 +69,16 @@ public class CsvParser {
     }
 
     private double getDouble(String[] tokens, Map<String, Integer> map, String column) {
-
         Integer index = map.get(column);
-
         if (index == null || index >= tokens.length) return 0;
-
-        try {
-            return Double.parseDouble(tokens[index]);
-        } catch (Exception e) {
-            return 0;
-        }
+        try { return Double.parseDouble(tokens[index]); }
+        catch (Exception e) { return 0; }
     }
 
     private int getInt(String[] tokens, Map<String, Integer> map, String column) {
-
         Integer index = map.get(column);
-
         if (index == null || index >= tokens.length) return 0;
-
-        try {
-            return Integer.parseInt(tokens[index]);
-        } catch (Exception e) {
-            return 0;
-        }
+        try { return Integer.parseInt(tokens[index]); }
+        catch (Exception e) { return 0; }
     }
 }
