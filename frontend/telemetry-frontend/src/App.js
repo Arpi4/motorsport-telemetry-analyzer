@@ -20,14 +20,21 @@ function App() {
     const [speedChart, setSpeedChart] = useState(null);
 
     const uploadFile = async () => {
+        if (!file) return;
 
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("http://localhost:8081/api/laps/analyze", {
+        const apiBaseUrl = (process.env.REACT_APP_API_BASE_URL || "").replace(/\/$/, "");
+        const res = await fetch(`${apiBaseUrl}/api/laps/analyze`, {
             method: "POST",
             body: formData
         });
+
+        if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            throw new Error(`Upload failed (${res.status}): ${text}`);
+        }
 
         const data = await res.json();
         setLapAnalysis(data);
